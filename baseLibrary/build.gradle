@@ -1,0 +1,143 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+def dpc = rootProject.ext.dependencies
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+/**
+ * 限定所有子类xml中的资源文件的前缀
+ * 注意：图片资源，限定失效，需要手动添加前缀
+ * */
+subprojects {
+    afterEvaluate {
+        android {
+            resourcePrefix "base_"
+        }
+    }
+}
+
+dependencies {
+    //test
+    testImplementation dpc.junit
+    androidTestImplementation dpc.espresso
+
+    //base
+    api dpc.appcompat
+    api dpc.material
+
+    //沉浸式
+    api dpc.immersionbar
+    api dpc.immersionbarComponents
+    implementation dpc.immersionbarKtx
+
+    //activity starter
+    api dpc.activityStarter
+
+    //util
+    api dpc.androidUtilCode
+
+    //rxjava
+    implementation dpc.rxJava
+    implementation dpc.rxAndroid
+    implementation dpc.rxBinding
+
+    //BRVAH
+    api dpc.brvah
+
+    //smart refresh
+    api dpc.smartRefresh
+
+    //okgo
+    api dpc.okgo
+    api dpc.chucker//okgo作者的一些util使用了此库
+
+    //gson
+    api dpc.gson
+
+    //loading
+    implementation dpc.avi
+
+    //glide
+    api dpc.glide
+
+    //kotlin
+    api dpc.kotlin
+    api dpc.kotlinReflect
+
+    //协程
+    api dpc.coroutinesCore
+    api dpc.coroutinesAndroid
+
+    //picture selector
+    api dpc.pictureSelector
+
+    //shape selector
+    api dpc.background
+
+    //底部tab
+    api dpc.flycoTabLayout
+}
+
+def aarPath = "build/outputs/aar/"
+def aarName = "baseLibrary-release.aar"
+def targetPath = "release/"
+def targetName = "base.aar"
+
+
+task clearJar(type: Delete) {
+    delete targetPath + targetName
+}
+
+/**
+ * 打包
+ * 请使用AndroidStudio4.0以上
+ */
+task makeJar(type: Copy) {
+    //设置拷贝的文件ba
+    from(aarPath)
+    //打进jar包后的文件目录
+    into(targetPath)
+    //将classes.jar放入release/目录下
+    //include ,exclude参数来设置过滤
+    //（我们只关心classes.jar这个文件）
+    include(aarName)
+    //重命名
+    rename (aarName, targetName)
+}
+
+
+
+makeJar.dependsOn(clearJar)
+makeJar.dependsOn(build)

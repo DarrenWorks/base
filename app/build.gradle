@@ -1,0 +1,68 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+def cfg = rootProject.ext.android
+def dpc = rootProject.ext.dependencies
+
+android {
+    compileSdkVersion cfg.compileSdkVersion
+    buildToolsVersion cfg.buildToolsVersion
+
+    defaultConfig {
+        applicationId "com.next.fresh"
+        minSdkVersion cfg.minSdkVersion
+        targetSdkVersion cfg.targetSdkVersion
+        versionCode cfg.versionCode
+        versionName cfg.versionName
+        manifestPlaceholders = rootProject.ext.manifestPlaceholders
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        signingConfigs {
+            debug {
+                storeFile file('..\\chuangsheng.jks')
+                storePassword 'chuangsheng'
+                keyAlias = 'chuangsheng'
+                keyPassword 'chuangsheng'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        viewBinding = true
+    }}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    testImplementation dpc.junit
+    androidTestImplementation dpc.espresso
+
+    implementation dpc.smartRefreshHeaderClassics
+    implementation dpc.smartRefreshFooterClassics
+
+    implementation dpc.amapLocation
+    implementation dpc.amapSearch
+    implementation dpc.amap3dmap
+
+    implementation project(':baseLibrary')
+}
