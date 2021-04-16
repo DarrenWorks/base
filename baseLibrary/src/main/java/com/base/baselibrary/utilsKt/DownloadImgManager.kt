@@ -26,7 +26,7 @@ import kotlin.Unit
  * On 2020/3/30 20:27
  * 分享页图片下载管理器
  */
-class DownloadImgManager(
+class ownloadImgManager(
         var mContext: Context,
         var mDownloadDone: (path: String) -> Unit = {},
         var imgName: String = "share"
@@ -127,7 +127,7 @@ class DownloadImgManager(
     }
 
     private fun getPath(): String {
-        return PathUtils.getExternalDownloadsPath() + "/gz/" + imgName + ".png"
+        return """${PathUtils.getExternalDownloadsPath()}/$prefix/$imgName.png"""
     }
 
 
@@ -136,5 +136,9 @@ class DownloadImgManager(
         WaitUrl,//等待下载地址
         Downloading,//下载中
         Downloaded//已下载
+    }
+
+    companion object {
+        const val prefix = "base"
     }
 }

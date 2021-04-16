@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.base.baselibrary.DarrenLibrary;
 import com.base.baselibrary.utils.DynamicTimeFormat;
-import com.base.baselibrary.utils.User;
+import com.base.baselibrary.utilsKt.User;
 import com.blankj.utilcode.util.ActivityUtils;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;

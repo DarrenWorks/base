@@ -1,4 +1,4 @@
-package com.base.baselibrary.utils
+package com.base.baselibrary.utilsKt
 
 import android.text.TextUtils
 import com.blankj.utilcode.util.GsonUtils

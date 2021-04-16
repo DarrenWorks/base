@@ -18,7 +18,7 @@ package com.base.baselibrary.okgo;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.base.baselibrary.utils.User;
+import com.base.baselibrary.utilsKt.User;
 import com.base.baselibrary.utilsKt.GeneralUtilsKt;
 import com.google.gson.stream.JsonReader;
 import com.lzy.okgo.convert.Converter;

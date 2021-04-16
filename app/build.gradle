@@ -54,7 +54,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    testImplementation dpc.junit
+    testImplementation dpc.junitExt
     androidTestImplementation dpc.espresso
 
     implementation dpc.smartRefreshHeaderClassics
