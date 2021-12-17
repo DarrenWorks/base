@@ -7,8 +7,7 @@ import com.google.gson.reflect.TypeToken
 
 
 class HistoryUtil private constructor(private val key: String, private val maxCount: Int) {
-
-    private var spUtils: SPUtils = SPUtils.getInstance("history")
+    private var spUtils: SPUtils = SPUtils.getInstance(SP_TAG)
     var history: MutableList<String>
         private set
 
@@ -24,6 +23,8 @@ class HistoryUtil private constructor(private val key: String, private val maxCo
     }
 
     companion object {
+        private const val SP_TAG = "history"
+
         @Volatile
         private var instance: HistoryUtil? = null
 
@@ -36,7 +37,7 @@ class HistoryUtil private constructor(private val key: String, private val maxCo
 
         @JvmStatic
         fun getInstance(maxCount: Int = 10): HistoryUtil {
-            return getInstance("history", maxCount)
+            return getInstance(SP_TAG, maxCount)
         }
     }
 

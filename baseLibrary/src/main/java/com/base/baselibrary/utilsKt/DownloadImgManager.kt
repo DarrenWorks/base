@@ -1,11 +1,10 @@
-package com.base.baselibrary.utils
+package com.base.baselibrary.utilsKt
 
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.MediaScannerConnection
 import android.provider.MediaStore
-import com.base.baselibrary.utilsKt.showToastShort
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.PermissionUtils
@@ -26,22 +25,21 @@ import kotlin.Unit
  * On 2020/3/30 20:27
  * 分享页图片下载管理器
  */
-class ownloadImgManager(
-        var mContext: Context,
-        var mDownloadDone: (path: String) -> Unit = {},
-        var imgName: String = "share"
+class DownloadImgManager(
+    var context: Context,
+    var downloadDone: (path: String) -> Unit = {},
+    var imgName: String = "share"
 ) {
-    var mUrl: String? = null
-        set
-
-    private fun setUrl(url: String) {
-        mUrl = url
-        if (mState == State.WaitUrl) {
-            download()
+    var url: String? = null
+        set(value) {
+            field = value
+            if (state == State.WaitUrl) {
+                download()
+            }
         }
-    }
 
-    var mState: State = State.Idle
+
+    var state: State = State.Idle
         set(value) {
             field = value
             toastState()
@@ -52,62 +50,68 @@ class ownloadImgManager(
      * @return no need downloading if true
      */
     private fun updateDownloadState(): Boolean {
-        return if (File(getPath()).exists()) {
-            mState = State.Downloaded
+        return if (File(getFullPath()).exists()) {
+            state = State.Downloaded
             true
         } else false
     }
 
-    fun download() {
+    private fun download() {
         PermissionUtils.permission(PermissionConstants.STORAGE)
-                .callback(object :PermissionUtils.SimpleCallback{
-                    override fun onGranted() {
-                        when {
-                            updateDownloadState() -> {
-                            }
-                            mUrl == null -> {
-                                mState = State.WaitUrl
-                            }
-                            else -> {
-                                val file = File(PathUtils.getExternalDownloadsPath() + "/gz")
-                                if (!file.exists()) {
-                                    if (!file.mkdir()) {
-                                        showToastShort("访问文件失败")
-                                        return
-                                    }
-                                }
-                                showToastShort("开始下载")
-                                mState = State.Downloading
-                                Glide.with(mContext)
-                                        .asBitmap()
-                                        .load(mUrl)
-                                        .into(object : SimpleTarget<Bitmap>() {
-                                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                                                runBlocking {
-                                                    withContext(Dispatchers.IO) {
-                                                        resource.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(getPath()))
-                                                    }
-                                                    mState = State.Downloaded
-                                                    mDownloadDone(getPath())
-                                                    updateMedia(mContext, PathUtils.getExternalDownloadsPath() + "/gz/", "$imgName.png")
-                                                }
+            .callback(object : PermissionUtils.SimpleCallback {
+                override fun onGranted() {
+                    when {
+                        updateDownloadState() -> {
+                        }
+                        url == null -> {
+                            state = State.WaitUrl
+                        }
+                        else -> {
+
+                            showToastShort("开始下载")
+                            state = State.Downloading
+                            Glide.with(context)
+                                .asBitmap()
+                                .load(url)
+                                .into(object : SimpleTarget<Bitmap>() {
+                                    override fun onResourceReady(
+                                        resource: Bitmap,
+                                        transition: Transition<in Bitmap>?
+                                    ) {
+                                        runBlocking {
+                                            withContext(Dispatchers.IO) {
+                                                resource.compress(
+                                                    Bitmap.CompressFormat.PNG,
+                                                    100,
+                                                    FileOutputStream(getFullPath())
+                                                )
                                             }
-                                        })
-                            }
+                                            state = State.Downloaded
+                                            downloadDone(getFullPath())
+                                            updateMedia()
+                                        }
+                                    }
+                                })
                         }
                     }
+                }
 
-                    override fun onDenied() {
-                        showToastShort("请开启权限后重试")
-                    }
-                })
-                .request()
+                override fun onDenied() {
+                    showToastShort("请开启权限后重试")
+                }
+            })
+            .request()
     }
 
-    fun updateMedia(context: Context, path: String, name: String) {
-        MediaScannerConnection.scanFile(context, arrayOf(path + name), null) { _, uri ->
+    fun updateMedia() {
+        MediaScannerConnection.scanFile(context, arrayOf(getFullPath()), null) { _, uri ->
             try {
-                MediaStore.Images.Media.insertImage(context.contentResolver, "$path$name", name, null)
+                MediaStore.Images.Media.insertImage(
+                    context.contentResolver,
+                    getFullPath(),
+                    getName(),
+                    null
+                )
             } catch (e: FileNotFoundException) {
                 e.printStackTrace()
             }
@@ -118,16 +122,26 @@ class ownloadImgManager(
     }
 
     private fun toastState() {
-        showToastShort(when (mState) {
-            State.WaitUrl -> "开始下载"
-            State.Downloading -> "开始下载"
-            State.Downloaded -> "已下载"
-            else -> ""
-        })
+        showToastShort(
+            when (state) {
+                State.WaitUrl -> "开始下载"
+                State.Downloading -> "开始下载"
+                State.Downloaded -> "已下载"
+                else -> ""
+            }
+        )
     }
 
     private fun getPath(): String {
-        return """${PathUtils.getExternalDownloadsPath()}/$prefix/$imgName.png"""
+        return """${PathUtils.getInternalAppCachePath()}/$prefix/"""
+    }
+
+    private fun getName(): String {
+        return "${imgName}.png"
+    }
+
+    private fun getFullPath(): String {
+        return getPath() + getName()
     }
 
 
